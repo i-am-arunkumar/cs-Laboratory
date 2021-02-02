@@ -6,7 +6,7 @@ int input[32];
 int code[32]; 
   
 int ham_calc(int, int); 
-void solve(int input[], int); 
+void solve(int input[]); 
   
 
 int ham_calc(int position, int c_l) 
@@ -32,49 +32,52 @@ int ham_calc(int position, int c_l)
         return 1; 
 } 
   
-void solve(int input[], int n) 
+void solve(int data[]) 
 { 
-    int i, p_n = 0, c_l, j, k; 
-    i = 0; 
-  
-     
-    while (n > (int)pow(2, i) - (i + 1)) { 
-        p_n++; 
-        i++; 
-    } 
-  
-    c_l = p_n + n; 
-  
-    j = k = 0; 
-  
-    for (i = 0; i < c_l; i++) { 
-  
-        if (i == ((int)pow(2, k) - 1)) { 
-            code[i] = 0; 
-            k++; 
-        } 
-  
-        else { 
-            code[i] = input[j]; 
-            j++; 
-        } 
-    } 
-  
-
-    for (i = 0; i < p_n; i++) { 
-  
-        int position = (int)pow(2, i); 
-
-        int value = ham_calc(position, c_l); 
-
-        code[position - 1] = value; 
-    } 
-  
-    printf("\nThe generated Code Word is: "); 
-    for (i = 0; i < c_l; i++) { 
-        printf("%d", code[i]); 
-    } 
+    data[6]=data[0]^data[2]^data[4];
+	data[5]=data[0]^data[1]^data[4];
+	data[3]=data[0]^data[1]^data[2];
+ 
+	printf("\nEncoded data is\n");
+	for(int i=0;i<7;i++)
+        printf("%d",data[i]);
+ 
 } 
+
+
+void checkForError(int* receiverInput) {
+    int c1=receiverInput[6]^receiverInput[4]^receiverInput[2]^receiverInput[0];
+	int c2=receiverInput[5]^receiverInput[4]^receiverInput[1]^receiverInput[0];
+	int c3=receiverInput[3]^receiverInput[2]^receiverInput[1]^receiverInput[0];
+	int c=c3*4+c2*2+c1 , i;
+ 
+    if(c==0) {
+		printf("\nNo error while transmission of data\n");
+    }
+	else {
+		printf("\nError on position %d",c);
+    	
+		printf("\nData sent : ");
+        for(i=0;i<7;i++)
+        	printf("%d",code[i]);
+        
+		printf("\nData received : ");
+        for(i=0;i<7;i++)
+        	printf("%d",receiverInput[i]);
+		
+		printf("\nError Correction : \n");
+ 
+		//if errorneous bit is 0 we complement it else vice versa
+		if(receiverInput[7-c]==0)
+			receiverInput[7-c]=1;
+        else
+			receiverInput[7-c]=0;
+		
+		for (i=0;i<7;i++) {
+			printf("%d",receiverInput[i]);
+		}
+	}
+}
   
 void main() 
 { 
@@ -82,11 +85,11 @@ void main()
     printf("Enter No of Bits in data  : \n");
     scanf("%d", &N);
 
-    printf("\n Sender Side : \n");
+    printf("\n Sender Side : \n\n");
 
-    prntf("Enter the Data \n");
+    printf("Enter the Data \n");
     
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < 4; i++)
     {
         scanf("%d", &input[i]);
     }
@@ -95,15 +98,21 @@ void main()
 
 
     // Function Call 
-    solve(input, N);
+    solve(input);
 
-    printf("\nReceiver Side\n");
+    printf("\n\nReceiver Side : \n\n");
 
-    for (int i = 0; i < N; i++)
+    printf("Enter the data received :  \n");
+
+    int receivedData[32];
+
+    for (int i = 0; i < 7; i++)
     {
-        scanf("%d", &input[i]);
+        scanf("%d", &receivedData[i]);
     }
 
-    
+    checkForError(receivedData);
+}
 
-} 
+
+
