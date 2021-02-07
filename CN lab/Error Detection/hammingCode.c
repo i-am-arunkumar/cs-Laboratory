@@ -1,118 +1,133 @@
-#include <math.h> 
-#include <stdio.h> 
-  
-int input[32]; 
-  
-int code[32]; 
-  
-int ham_calc(int, int); 
-void solve(int input[]); 
-  
+// C program for the above approach
 
-int ham_calc(int position, int c_l) 
-{ 
-    int count = 0, i, j; 
-    i = position - 1; 
-  
-    while (i < c_l) { 
-  
-        for (j = i; j < i + position; j++) { 
-  
-            // If current boit is 1 
-            if (code[j] == 1) 
-                count++; 
-        } 
-  
-        i = i + 2 * position; 
-    } 
-  
-    if (count % 2 == 0) 
-        return 0; 
-    else
-        return 1; 
-} 
-  
-void solve(int data[]) 
-{ 
-    data[6]=data[0]^data[2]^data[4];
-	data[5]=data[0]^data[1]^data[4];
-	data[3]=data[0]^data[1]^data[2];
- 
-	printf("\nEncoded data is\n");
-	for(int i=0;i<7;i++)
-        printf("%d",data[i]);
- 
-} 
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
+// Store input bits
+int input[32];
+int recInput[32];
+int n;
+// Store hamming code
+int code[32];
 
-void checkForError(int* receiverInput) {
-    int c1=receiverInput[6]^receiverInput[4]^receiverInput[2]^receiverInput[0];
-	int c2=receiverInput[5]^receiverInput[4]^receiverInput[1]^receiverInput[0];
-	int c3=receiverInput[3]^receiverInput[2]^receiverInput[1]^receiverInput[0];
-	int c=c3*4+c2*2+c1 , i;
- 
-    if(c==0) {
-		printf("\nNo error while transmission of data\n");
+int ham_calc(int, int);
+void solve(int input[], int);
+
+// Driver Code
+void main()
+{
+    printf("Enter Number of bits : ");
+    scanf("%d", &n);
+
+    printf("\nSender Side\n");
+
+    printf("Enter the data to Transmit : ");
+
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", input[i]);
     }
-	else {
-		printf("\nError on position %d",c);
-    	
-		printf("\nData sent : ");
-        for(i=0;i<7;i++)
-        	printf("%d",code[i]);
-        
-		printf("\nData received : ");
-        for(i=0;i<7;i++)
-        	printf("%d",receiverInput[i]);
-		
-		printf("\nError Correction : \n");
- 
-		//if errorneous bit is 0 we complement it else vice versa
-		if(receiverInput[7-c]==0)
-			receiverInput[7-c]=1;
-        else
-			receiverInput[7-c]=0;
-		
-		for (i=0;i<7;i++) {
-			printf("%d",receiverInput[i]);
-		}
-	}
-}
-  
-void main() 
-{ 
-    int N; 
-    printf("Enter No of Bits in data  : \n");
-    scanf("%d", &N);
 
-    printf("\n Sender Side : \n\n");
+    // Function Call
+    solve(input, n);
 
-    printf("Enter the Data \n");
+    for (int i = 0; i < (sizeof(code)/sizeof(int)); i++)
+    {
+        printf("%d",code[i]);
+    }
+
+
+    printf("\nReceiver Side\n");
+
+    print("Enter the data recevied : ");
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", recInput[i]);
+    }
     
-    for (int i = 0; i < 4; i++)
-    {
-        scanf("%d", &input[i]);
-    }
-
-    printf("Generating hamming code .... ");
-
-
-    // Function Call 
-    solve(input);
-
-    printf("\n\nReceiver Side : \n\n");
-
-    printf("Enter the data received :  \n");
-
-    int receivedData[32];
-
-    for (int i = 0; i < 7; i++)
-    {
-        scanf("%d", &receivedData[i]);
-    }
-
-    checkForError(receivedData);
 }
 
+// Function to calculate bit for
+// ith position
+int ham_calc(int position, int c_l)
+{
+    int count = 0, i, j;
+    i = position - 1;
 
+    // Traverse to store Hamming Code
+    while (i < c_l)
+    {
 
+        for (j = i; j < i + position; j++)
+        {
+
+            // If current boit is 1
+            if (code[j] == 1)
+                count++;
+        }
+
+        // Update i
+        i = i + 2 * position;
+    }
+
+    if (count % 2 == 0)
+        return 0;
+    else
+        return 1;
+}
+
+// Function to calculate hamming code
+void solve(int input[], int n)
+{
+    int i, p_n = 0, c_l, j, k;
+    i = 0;
+
+    // Find msg bits having set bit
+    // at x'th position of number
+    while (n > (int)pow(2, i) - (i + 1))
+    {
+        p_n++;
+        i++;
+    }
+
+    c_l = p_n + n;
+
+    j = k = 0;
+
+    // Traverse the msgBits
+    for (i = 0; i < c_l; i++)
+    {
+
+        // Update the code
+        if (i == ((int)pow(2, k) - 1))
+        {
+            code[i] = 0;
+            k++;
+        }
+
+        // Update the code[i] to the
+        // input character at index j
+        else
+        {
+            code[i] = input[j];
+            j++;
+        }
+    }
+
+    // Traverse and update the
+    // hamming code
+    for (i = 0; i < p_n; i++)
+    {
+
+        // Find current position
+        int position = (int)pow(2, i);
+
+        // Find value at current position
+        int value = ham_calc(position, c_l);
+
+        // Update the code
+        code[position - 1] = value;
+    }
+
+}
